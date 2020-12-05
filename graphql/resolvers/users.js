@@ -48,42 +48,42 @@ module.exports = {
             }
         },
         async register(
-            _,
+            _, 
             {
-                registerInput : { username, email, password, confirmPassword }
+            registerInput: { username, email, password, confirmPassword }
             }){
-                const { errors, valid } = validateRegisterInput(username, email, password, confirmPassword);
-                if(!valid){
-                    throw new UserInputError("Errors", {errors});
-                }
-
-                const user = await User.findOne({ username });
-                if(user){
-                    throw new UserInputError("Username is taken", {
-                        errors: {
-                            username: "This username is taken already"
-                        }
-                    });
-                }
-                
-                password = await bcrypt.hash(password, 12);
-
-                const newUser = new User({
-                    email,
-                    username,
-                    password,
-                    createdAt: new Date().toISOString()
-                });
-
-                const res = await newUser.save();
-
-                const token = generateToken(res);
-
-                return {
-                    ...res._doc,
-                    id: res._id,
-                    token
-                }
-            }
+              //validate user data
+              const { errors, valid } = validateRegisterInput(username, email, password, confirmPassword);
+              if(!valid) {
+                  throw new UserInputError("Errors", { errors });
+              }
+              //make sure user doesnt exist already
+              const user = await User.findOne({ username });
+              if(user){
+                  throw new UserInputError("Username is taken", {
+                      errors: {
+                          username: "This username is taken already!"
+                      }
+                  });
+              }
+              // hash password and create auth token
+              password = await bcrypt.hash(password, 12);
+  
+              const newUser = new User({
+                  email,
+                  username,
+                  password,
+                  createdAt: new Date().toString()
+              });
+  
+              const res = await newUser.save();
+  
+              const token = generateToken(res)
+              return {
+                  ...res._doc,
+                  id: res._id,
+                  token
+              }
+          }
     }
 }
